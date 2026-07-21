@@ -375,6 +375,11 @@ function kupeMobileCalc() {
 const ORDER_PHONE_DISPLAY = '+7 910 140-42-91';
 const ORDER_PHONE_TEL = '+79101404291';
 const ORDER_SITE_URL = 'https://keppochka-nwr.github.io/kupe-calc/';
+// Прямые ссылки на чаты. Max НЕ поддерживает ссылки по номеру телефона —
+// нужна персональная ссылка профиля (Max: аватар → QR-код → Поделиться → Скопировать ссылку).
+// Пустая строка = кнопка мессенджера скрыта.
+const ORDER_MAX_URL = '';                       // вида https://max.ru/u/XXXXXXXX (ждём ссылку из приложения Max)
+const ORDER_TG_URL  = 'https://t.me/Keppochka';
 
 function buildOrderText() {
   const d = window._lastCalcData;
@@ -408,8 +413,24 @@ function openOrderModal() {
   const ph = $('orderPhoneLink');
   if (ph) { ph.textContent = ORDER_PHONE_DISPLAY; ph.href = 'tel:' + ORDER_PHONE_TEL; }
   const cb = $('orderCopyBtn'); if (cb) cb.textContent = 'Скопировать текст';
+  // Кнопки мессенджеров видны только если ссылка задана
+  const mb = $('orderMaxBtn'); if (mb) mb.style.display = ORDER_MAX_URL ? '' : 'none';
+  const tb = $('orderTgBtn');  if (tb) tb.style.display = ORDER_TG_URL  ? '' : 'none';
+  const hint = $('orderHint');
+  if (hint) hint.textContent = (ORDER_MAX_URL || ORDER_TG_URL)
+    ? 'Кнопки мессенджеров откроют чат с нами — расчёт уже скопирован, просто вставьте его в сообщение и отправьте.'
+    : '«Отправить» откроет список приложений — выберите мессенджер и отправьте сообщение на номер выше. На компьютере текст можно просто скопировать.';
   m.style.display = 'flex';
   document.addEventListener('keydown', _orderEsc);
+}
+
+// Открыть чат в мессенджере: расчёт заранее кладём в буфер обмена,
+// клиенту остаётся вставить его в открывшийся чат (прямой prefill Max/TG не поддерживают)
+function orderOpenMessenger(kind) {
+  const url = kind === 'max' ? ORDER_MAX_URL : ORDER_TG_URL;
+  if (!url) return;
+  orderCopy();
+  window.open(url, '_blank', 'noopener');
 }
 
 function closeOrderModal() {

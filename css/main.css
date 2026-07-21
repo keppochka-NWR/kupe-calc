@@ -872,6 +872,16 @@ button{cursor:pointer;background:none;border:none}
 }
 .order-actions{display:flex;flex-direction:column;gap:8px}
 .order-btn{height:42px;width:100%}
+.order-btn-max{
+  background:#4662e0;color:#fff;border:none;border-radius:.42rem;
+  font-size:.82rem;font-weight:700;letter-spacing:.02em;cursor:pointer;transition:opacity .15s;
+}
+.order-btn-max:hover{opacity:.88}
+.order-btn-tg{
+  background:#2aabee;color:#fff;border:none;border-radius:.42rem;
+  font-size:.82rem;font-weight:700;letter-spacing:.02em;cursor:pointer;transition:opacity .15s;
+}
+.order-btn-tg:hover{opacity:.88}
 .order-hint{font-size:.72rem;color:#9c958a;margin:0;line-height:1.45}
 
 /* ============================================================

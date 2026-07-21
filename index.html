@@ -6,7 +6,7 @@
 <title>Калькулятор дверей-купе</title>
 <!-- Шрифт Satoshi (Fontshare CDN) отключён — приложение работает оффлайн с USB.
      Fallback: Helvetica Neue → Arial → системный sans-serif. См. --font в css/main.css. -->
-<link rel="stylesheet" href="css/main.css?v=20260721b">
+<link rel="stylesheet" href="css/main.css?v=20260721c">
 </head>
 <body>
 
@@ -324,10 +324,12 @@
       </div>
       <pre id="orderText" class="order-text"></pre>
       <div class="order-actions">
-        <button type="button" class="kupe-btn-fill order-btn" onclick="orderShare()">Отправить расчёт…</button>
+        <button type="button" class="order-btn order-btn-max" id="orderMaxBtn" style="display:none" onclick="orderOpenMessenger('max')">Написать в Max</button>
+        <button type="button" class="order-btn order-btn-tg" id="orderTgBtn" style="display:none" onclick="orderOpenMessenger('tg')">Написать в Telegram</button>
+        <button type="button" class="kupe-btn-fill order-btn" onclick="orderShare()">Отправить через другое приложение…</button>
         <button type="button" class="kupe-btn-out order-btn" id="orderCopyBtn" onclick="orderCopy()">Скопировать текст</button>
       </div>
-      <p class="order-hint">«Отправить» откроет список приложений — выберите Max и отправьте сообщение на номер выше. На компьютере текст можно просто скопировать.</p>
+      <p class="order-hint" id="orderHint">Кнопки мессенджеров откроют чат с нами — расчёт уже скопирован, просто вставьте его в сообщение и отправьте.</p>
     </div>
   </div>
 </div>
@@ -348,22 +350,22 @@
 </div>
 
 <!-- 1. Данные -->
-<script src="data/fillings.js?v=20260721b"></script>
-<script src="data/profiles.js?v=20260721b"></script>
-<script src="data/lamarty.js?v=20260721b"></script>
-<script src="data/profile-sections.js?v=20260721b"></script>
+<script src="data/fillings.js?v=20260721c"></script>
+<script src="data/profiles.js?v=20260721c"></script>
+<script src="data/lamarty.js?v=20260721c"></script>
+<script src="data/profile-sections.js?v=20260721c"></script>
 
 <!-- 2. Утилиты и store -->
-<script src="js/utils.js?v=20260721b"></script>
-<script src="js/store.js?v=20260721b"></script>
+<script src="js/utils.js?v=20260721c"></script>
+<script src="js/store.js?v=20260721c"></script>
 
 <!-- 3. Router -->
-<script src="js/router.js?v=20260721b"></script>
+<script src="js/router.js?v=20260721c"></script>
 
 <!-- 4. Shared layers -->
-<script src="js/shared-kp.js?v=20260721b"></script>
+<script src="js/shared-kp.js?v=20260721c"></script>
 
 <!-- 5. Модуль купе -->
-<script src="js/kupe.js?v=20260721b"></script>
+<script src="js/kupe.js?v=20260721c"></script>
 </body>
 </html>
