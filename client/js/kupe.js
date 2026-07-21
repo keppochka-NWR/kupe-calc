@@ -375,8 +375,8 @@ function kupeMobileCalc() {
 const ORDER_PHONE_DISPLAY = '+7 910 140-42-91';
 const ORDER_PHONE_TEL = '+79101404291';
 const ORDER_SITE_URL = 'https://keppochka-nwr.github.io/kupe-calc/client/';
-// Google Apps Script Web App — приём заявок в таблицу (контур Б).
-// Пусто = заявки идут через мессенджеры. Инструкция включения: docs/client-project/ORDERS.md
+// Автоприём заявок (таблица/почта) — подключается позже, см. docs/client-project/ORDERS.md.
+// Пусто = заявки идут через мессенджеры (контур А, работает всегда).
 const ORDER_GAS_URL = '';
 // Прямые ссылки на чаты. Max НЕ поддерживает ссылки по номеру телефона —
 // нужна персональная ссылка профиля (Max: аватар → QR-код → Поделиться → Скопировать ссылку).
