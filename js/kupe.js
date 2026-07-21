@@ -369,6 +369,84 @@ function kupeMobileCalc() {
   if (window._lastCalcData && window._lastCalcData !== before) kupeMobileScrollResults();
 }
 
+/* ============================================================
+   v1.5: «ЗАКАЗАТЬ ДВЕРЬ» — отправка расчёта клиентом в мессенджер
+   ============================================================ */
+const ORDER_PHONE_DISPLAY = '+7 910 140-42-91';
+const ORDER_PHONE_TEL = '+79101404291';
+const ORDER_SITE_URL = 'https://keppochka-nwr.github.io/kupe-calc/';
+
+function buildOrderText() {
+  const d = window._lastCalcData;
+  if (!d) return '';
+  const sel = id => {
+    const el = $(id);
+    return el && el.selectedOptions && el.selectedOptions[0] ? el.selectedOptions[0].textContent.trim() : '';
+  };
+  const lines = [];
+  lines.push('Заявка с калькулятора дверей-купе');
+  if (window._kupeProjectNum) lines.push('Проект № ' + window._kupeProjectNum);
+  lines.push('Проём: ' + d.W + ' × ' + d.H + ' мм, ' + d.N + ' ' + pluralDoors(d.N));
+  const prof = [sel('profileFamily'), sel('profileSystem')].filter(Boolean).join(' ');
+  const col = sel('profileColor');
+  lines.push('Профиль: ' + prof + (col ? ', ' + col : ''));
+  const mats = [];
+  d.fills.forEach(f => { if (f && f.n && mats.indexOf(f.n) === -1) mats.push(f.n); });
+  lines.push('Наполнение: ' + mats.join('; '));
+  if (d.softCloseCost > 0) lines.push('Доводчик: да');
+  if (d.filmCost > 0) lines.push('Защитная плёнка: да');
+  lines.push('ИТОГО: ' + fmt(d.total) + ' ₽');
+  lines.push('Расчёт сделан на ' + ORDER_SITE_URL);
+  return lines.join('\n');
+}
+
+function _orderEsc(e) { if (e.key === 'Escape') closeOrderModal(); }
+
+function openOrderModal() {
+  const m = $('orderModal'); if (!m) return;
+  const t = $('orderText'); if (t) t.textContent = buildOrderText();
+  const ph = $('orderPhoneLink');
+  if (ph) { ph.textContent = ORDER_PHONE_DISPLAY; ph.href = 'tel:' + ORDER_PHONE_TEL; }
+  const cb = $('orderCopyBtn'); if (cb) cb.textContent = 'Скопировать текст';
+  m.style.display = 'flex';
+  document.addEventListener('keydown', _orderEsc);
+}
+
+function closeOrderModal() {
+  const m = $('orderModal'); if (m) m.style.display = 'none';
+  document.removeEventListener('keydown', _orderEsc);
+}
+
+function orderShare() {
+  const text = buildOrderText();
+  if (navigator.share) {
+    // Телефон: системная шторка «Поделиться» — клиент выбирает Max/WhatsApp/что угодно
+    navigator.share({ text: text }).catch(function () { /* клиент закрыл шторку — не ошибка */ });
+  } else {
+    orderCopy(); // десктоп без Web Share API — просто копируем текст
+  }
+}
+
+function orderCopy() {
+  const text = buildOrderText();
+  const done = () => { const b = $('orderCopyBtn'); if (b) b.textContent = 'Скопировано ✓'; };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(() => _orderFallbackCopy(text, done));
+  } else {
+    _orderFallbackCopy(text, done);
+  }
+}
+
+function _orderFallbackCopy(text, done) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;opacity:0';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); done(); } catch (e) {}
+  document.body.removeChild(ta);
+}
+
 function startRulerEdit(labelDiv) {
   if (labelDiv.querySelector('input')) return; // уже редактируется
   const H     = num('height', 2000);
@@ -1631,6 +1709,9 @@ function renderResults(d) {
       '</div>' +
     '</div>' +
 
+    // v1.5: CTA для клиентов — отправить расчёт в мессенджер
+    '<button type="button" class="kupe-btn-order" onclick="openOrderModal()">Отправить расчёт / заказать</button>' +
+
     // — Спецификация
     '<div>' +
       '<div class="kupe-sec-lbl" style="margin-bottom:6px">Спецификация</div>' +
@@ -2656,7 +2737,7 @@ function initKupeVersion() {
   const fv = (typeof FILLINGS_VERSION !== 'undefined') ? FILLINGS_VERSION : '—';
   const pv = (typeof PROFILES_VERSION !== 'undefined') ? PROFILES_VERSION : '—';
   // Show most recent of versions
-  el.textContent = 'v 2.8 — прайс ' + (fv > pv ? fv : pv);
+  el.textContent = 'v 2.9 — прайс ' + (fv > pv ? fv : pv);
 }
 
 /**
