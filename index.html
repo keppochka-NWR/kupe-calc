@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Калькулятор дверей-купе</title>
+<!-- Шрифт Satoshi (Fontshare CDN) отключён — приложение работает оффлайн с USB.
+     Fallback: Helvetica Neue → Arial → системный sans-serif. См. --font в css/main.css. -->
+<link rel="stylesheet" href="css/main.css?v=20260721">
+</head>
+<body>
+
+<!-- ============================================================
+     HEADER
+     ============================================================ -->
+<header class="hdr">
+  <div class="hdr-top">
+    <a class="logo" href="#">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+        <rect x="2" y="4" width="11" height="20" rx="1.5" stroke="currentColor" stroke-width="1.8"/>
+        <rect x="15" y="4" width="11" height="20" rx="1.5" stroke="currentColor" stroke-width="1.8"/>
+        <line x1="2" y1="14" x2="13" y2="14" stroke="currentColor" stroke-width="1.4"/>
+        <circle cx="11" cy="14" r="1.4" fill="currentColor"/>
+        <circle cx="17" cy="14" r="1.4" fill="currentColor"/>
+      </svg>
+      <div>
+        <div class="logo-name">Двери-купе</div>
+        <div class="logo-tag">Калькулятор</div>
+      </div>
+    </a>
+    <!-- v1.3.2: переключатель темы удалён (тёмная тема не используется в B2B-калькуляторе) -->
+    <div class="hdr-actions"></div>
+  </div>
+  <nav class="nav-tabs" id="navTabs">
+    <a class="nav-tab active" href="#kupe" data-tab="kupe">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="8" height="18" rx="1"/><rect x="13" y="3" width="8" height="18" rx="1"/></svg>
+      Двери-купе
+    </a>
+  </nav>
+</header>
+
+<!-- ============================================================
+     MODULE: ДВЕРИ-КУПЕ — 3-column редизайн (Phase 5)
+     ============================================================ -->
+<div class="module-page active" id="page-kupe">
+
+  <!-- Top bar -->
+  <div class="kupe-topbar">
+    <div class="kupe-bc">
+      <span class="kupe-bc-muted">Калькулятор</span>
+      <span class="kupe-bc-sep">/</span>
+      <span class="kupe-bc-current">Двери-купе</span>
+      <span class="kupe-bc-version" id="kupeVersion">v 2.8 — 2026.07.21</span>
+    </div>
+    <div class="kupe-topbar-actions">
+      <button class="kupe-btn-out" onclick="kupeOpenDraftsList()" title="Открыть сохранённый">Открыть</button>
+      <button class="kupe-btn-out" onclick="kupeSaveDraft()" title="Сохранить в localStorage">Сохранить</button>
+      <button class="kupe-btn-fill" id="kupeExportKPBtn" onclick="openKP()" disabled title="Сначала рассчитайте стоимость">Экспорт КП</button>
+    </div>
+  </div>
+
+  <!-- 3-колонная сетка -->
+  <div class="kupe-3col">
+
+    <!-- LEFT: 01 — ПАРАМЕТРЫ -->
+    <aside class="kupe-col kupe-col-left" id="panelForm">
+      <div class="kupe-col-head">01 — ПАРАМЕТРЫ</div>
+
+      <div id="kupeForm" class="kupe-form-list">
+
+        <div class="kupe-sec">
+          <div class="kupe-sec-lbl">Размеры проёма, мм</div>
+          <div class="kupe-row-2">
+            <input class="kupe-inp" id="width" type="number" value="1200" min="400" max="4000" placeholder="Ширина">
+            <input class="kupe-inp" id="height" type="number" value="2000" min="600" max="3000" placeholder="Высота">
+          </div>
+        </div>
+
+        <div class="kupe-sec">
+          <div class="kupe-sec-lbl">Количество дверей</div>
+          <div class="kupe-chips" id="doorCountChips">
+            <button class="kupe-chip" data-val="1">1</button>
+            <button class="kupe-chip kupe-chip-active" data-val="2">2</button>
+            <button class="kupe-chip" data-val="3">3</button>
+            <button class="kupe-chip" data-val="4">4</button>
+            <button class="kupe-chip" data-val="5">5</button>
+            <button class="kupe-chip" data-val="6">6</button>
+            <button class="kupe-chip" data-val="7">7</button>
+          </div>
+          <select id="doorCount" style="display:none" onchange="onDoorCountChange()">
+            <option value="1">1</option><option value="2" selected>2</option>
+            <option value="3">3</option><option value="4">4</option>
+            <option value="5">5</option><option value="6">6</option>
+            <option value="7">7</option>
+          </select>
+        </div>
+
+        <div id="singlePartRow" style="display:none">
+          <div class="tog-row partition-row">
+            <div>
+              <div class="tog-lbl" style="display:flex;align-items:center;gap:6px;color:var(--color-primary)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="8" height="18" rx="1.5"/><rect x="13" y="3" width="8" height="18" rx="1.5" opacity=".35" stroke-dasharray="3 2"/></svg>
+                Одиночная перегородка
+              </div>
+              <div class="tog-desc">Оплачивается 1 дверь</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="singlePartition"><span class="t-slider"></span></label>
+          </div>
+        </div>
+
+        <div class="kupe-sec">
+          <div class="kupe-sec-lbl">Профиль</div>
+          <select class="kupe-sel" id="profileFamily" onchange="onProfileFamilyChange()" title="Семейство профилей"></select>
+          <div class="profile-with-preview" style="margin-top:8px">
+            <select class="kupe-sel" id="profileSystem" onchange="onProfileSystemChange()" title="Конкретный профиль семейства" style="flex:1"></select>
+            <button class="btn-icon profile-sec-btn" type="button" onclick="showProfileSection()" title="Показать сечение профиля">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="3" x2="12" y2="21"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+            </button>
+          </div>
+          <select class="kupe-sel" id="profileColor" onchange="onProfileColorChange()" style="margin-top:8px" title="Цвет профиля"></select>
+          <input type="hidden" id="profMarkup" value="0">
+        </div>
+
+        <div class="kupe-sec" id="bulkPanel">
+          <details class="bulk-details">
+            <summary class="kupe-sec-lbl bulk-summary">Массовые операции</summary>
+            <div class="bulk-actions">
+              <div class="bulk-row bulk-row-stack">
+                <select class="kupe-sel" id="bulkFillSel" title="Материал для массовой замены"></select>
+                <button class="btn-secondary bulk-btn" type="button" onclick="bulkApplyFillToAll()">Применить ко всем дверям</button>
+              </div>
+              <div class="bulk-row bulk-row-copy">
+                <span class="bulk-lbl">Скопировать дверь</span>
+                <select class="kupe-sel bulk-inline-sel" id="bulkCopyFrom" title="Откуда"></select>
+                <span class="bulk-arrow">→</span>
+                <select class="kupe-sel bulk-inline-sel" id="bulkCopyTo" title="Куда"></select>
+                <button class="btn-secondary bulk-btn bulk-btn-sm" type="button" onclick="bulkCopyDoor()">Копировать</button>
+              </div>
+              <div class="bulk-row bulk-row-stack">
+                <button class="btn-secondary bulk-btn" type="button" onclick="bulkResetDividers()" title="Распределить разделители всех дверей равномерно по высоте">Сбросить разделители всех дверей</button>
+                <button class="btn-secondary bulk-btn bulk-btn-danger" type="button" onclick="bulkClearAllFills()" title="Сбросить все полотна на материал по умолчанию">Очистить все полотна</button>
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <div class="kupe-sec">
+          <div class="kupe-sec-lbl">Заполнение секций</div>
+          <div class="kupe-fills-list" id="kupeFillsList">
+            <div class="kupe-hint">Нажмите на секцию в превью чтобы выбрать материал</div>
+          </div>
+        </div>
+
+        <div class="kupe-sec">
+          <div class="kupe-sec-lbl">Сетка секций</div>
+          <div class="sect-grid" id="sectionsGrid"></div>
+          <div id="dividersBlock" style="display:none;flex-direction:column;gap:var(--sp3);margin-top:8px"></div>
+        </div>
+
+        <div class="kupe-sec">
+          <div class="kupe-sec-lbl">Фурнитура и работа</div>
+          <div class="tog-row">
+            <div>
+              <div class="tog-lbl">Доводчик</div>
+              <div class="tog-desc">+7 000 ₽ за дверь</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="softClose"><span class="t-slider"></span></label>
+          </div>
+          <div class="tog-row" id="complexRow" style="display:none;margin-top:6px">
+            <div>
+              <div class="tog-lbl">Сложная сборка <span class="badge badge-w" style="margin-left:5px">Авто</span></div>
+              <div class="tog-desc" id="complexDesc">+6 000 ₽ за дверь (более 4 вставок)</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="complexWork" disabled checked><span class="t-slider"></span></label>
+          </div>
+        </div>
+
+        <input type="hidden" id="fillMarkup" value="0">
+
+      </div><!-- /kupeForm -->
+
+      <!-- SECTION EDITOR -->
+      <div id="sectionEditor" style="display:none;flex-direction:column;gap:var(--sp4)">
+        <!-- v1.3 — Заметная кнопка возврата к основной форме -->
+        <button class="sec-back-btn" type="button" onclick="closeSectionEditor()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="15 18 9 12 15 6"/></svg>
+          <span>Назад к параметрам</span>
+        </button>
+        <!-- v1.2 — Door tabs (быстрое переключение между дверями) -->
+        <div id="doorEditTabs" class="door-edit-tabs"></div>
+        <!-- v1.2 — Per-door section grid override -->
+        <div id="doorSectOptCard" class="card" style="display:none">
+          <div class="card-body" style="gap:8px">
+            <div class="dso-head">
+              <div class="dso-title">Сетка секций · <span id="dsoDoorNum">Дверь 1</span></div>
+              <label class="toggle dso-toggle"><input type="checkbox" id="doorSectIndiv" onchange="onToggleDoorSectIndiv()"><span class="t-slider"></span></label>
+            </div>
+            <div id="dsoCurrentLabel" class="dso-current"></div>
+            <div id="doorSectGrid" class="sect-grid" style="display:none"></div>
+            <button id="dsoApplyAll" class="btn-secondary" type="button" onclick="applySectOptToAllDoors()" style="display:none;margin-top:6px">Применить эту сетку ко всем дверям</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head" style="display:flex;align-items:center;gap:var(--sp3);padding:var(--sp3) var(--sp4)">
+            <div class="card-title" id="sectionEditorTitle">Дверь 1</div>
+          </div>
+          <div class="card-body" style="padding-top:0;max-height:440px;overflow-y:auto">
+            <input type="search" id="matSearch" class="kupe-mat-search" placeholder="🔍 Поиск материала..." oninput="filterMaterials(this.value)">
+            <div id="sectionMaterialList"></div>
+          </div>
+        </div>
+        <div class="card" id="texRotCard" style="display:none" title="Поворачивает текстуру ЛДСП на 90°. Используется когда дверь шире 1830 мм — длина листа (2750 мм) пойдёт по горизонтали.">
+          <div class="card-body">
+            <div class="tog-row" id="texRotRow">
+              <div>
+                <div class="tog-lbl">Горизонтальная укладка ЛДСП</div>
+                <div class="tog-desc" id="texRotDesc">Лист 2750×1830 мм · поворот текстуры на 90°</div>
+              </div>
+              <label class="toggle" title="Применяется когда дверь шире 1830 мм"><input type="checkbox" id="texRotToggle" onchange="onTexRotToggle()"><span class="t-slider"></span></label>
+            </div>
+          </div>
+        </div>
+        <div class="card" id="filmCard">
+          <div class="card-body">
+            <div class="tog-row" id="filmRow">
+              <div>
+                <div class="tog-lbl">Защитная плёнка</div>
+                <div class="tog-desc" id="filmDesc">Армировочная · 240 ₽/м²</div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="filmToggle"><span class="t-slider"></span></label>
+            </div>
+          </div>
+        </div>
+        <div class="card sec-actions-sticky">
+          <div class="card-body" style="display:flex;gap:var(--sp2);flex-direction:column">
+            <button class="btn-secondary sec-apply-btn" onclick="applyToAllSections()">Применить ко всем&nbsp;секциям этой двери</button>
+            <button class="btn-secondary sec-apply-btn" onclick="applyToAllDoors()">Применить ко всем&nbsp;дверям</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CENTER: визуализация -->
+    <main class="kupe-col kupe-col-center" id="kupeVizCol">
+      <div class="kupe-viz-stage" id="kupeVizStage">
+        <div class="kupe-empty" id="emptyState">
+          <svg width="52" height="52" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="4" width="11" height="20" rx="1.5"/><rect x="15" y="4" width="11" height="20" rx="1.5"/><line x1="2" y1="14" x2="13" y2="14"/></svg>
+          <h3>Введите параметры</h3>
+          <p>Заполните размеры и нажмите «Рассчитать»</p>
+        </div>
+        <div class="kupe-viz-area" id="kupeVizArea" style="display:none">
+          <div class="viz-room" id="vizRoom"></div>
+          <div class="kupe-proj-badge" id="kupeProjBadge">
+            <div class="kupe-proj-num">ПРОЕКТ № <span id="kupeProjNum">—</span></div>
+            <div class="kupe-proj-meta" id="kupeProjMeta">— × — мм · — ДВЕРЕЙ</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- RIGHT: 02 — РАСЧЁТ -->
+    <aside class="kupe-col kupe-col-right" id="resultPanel">
+      <div class="kupe-col-head">02 — РАСЧЁТ</div>
+
+      <div id="kupeResultEmpty">
+        <div class="kupe-hero-lbl">ИТОГО</div>
+        <div class="kupe-hero-price" style="opacity:.3">— ₽</div>
+        <div class="kupe-hint" style="margin-bottom:16px">Введите параметры и нажмите «Рассчитать»</div>
+        <button class="kupe-btn-calc" onclick="calculate()">Рассчитать стоимость</button>
+        <button class="kupe-btn-link" onclick="resetForm()">Сбросить параметры</button>
+      </div>
+
+      <div id="resultContent" style="display:none;flex-direction:column;gap:var(--sp4)"></div>
+    </aside>
+
+  </div>
+
+  <!-- v1.4: мобильная нижняя панель — видна только на экранах ≤768px -->
+  <div class="kupe-mobile-bar" id="kupeMobileBar">
+    <button type="button" class="kupe-mbar-total" onclick="kupeMobileScrollResults()" title="К деталям расчёта">
+      <span class="kupe-mbar-lbl">Итого</span>
+      <span class="kupe-mbar-price" id="kupeMobileTotal">— ₽</span>
+    </button>
+    <button type="button" class="kupe-mbar-calc" onclick="kupeMobileCalc()">Рассчитать</button>
+  </div>
+</div>
+
+<!-- Profile section modal -->
+<div id="profileSectionModal" class="psec-modal" style="display:none">
+  <div class="psec-modal-backdrop" onclick="closeProfileSection()"></div>
+  <div class="psec-modal-panel">
+    <div class="psec-modal-bar">
+      <span class="psec-modal-title" id="psecModalTitle">Сечение профиля</span>
+      <button class="psec-modal-close" type="button" onclick="closeProfileSection()" aria-label="Закрыть">✕</button>
+    </div>
+    <div class="psec-modal-body">
+      <div class="psec-modal-img-wrap">
+        <img id="psecModalImg" alt="Сечение профиля" class="psec-modal-img">
+        <div id="psecModalPlaceholder" class="psec-modal-placeholder" style="display:none">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><line x1="12" y1="3" x2="12" y2="21"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+          <p>Сечение для этой системы пока не добавлено в каталог.</p>
+          <p class="psec-modal-placeholder-hint">Будет извлечено из техкаталога Аристо в следующих обновлениях.</p>
+        </div>
+      </div>
+      <div class="psec-modal-meta" id="psecModalMeta"></div>
+      <div class="psec-modal-desc" id="psecModalDesc"></div>
+    </div>
+  </div>
+</div>
+
+<!-- KP modal -->
+<div id="kpDocument">
+  <div class="kp-modal-bar">
+    <span style="font-weight:600;font-size:.9rem;color:#333">Коммерческое предложение — предпросмотр</span>
+    <div class="kp-modal-actions">
+      <button class="kp-btn-print" onclick="window.print()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Печать / PDF
+      </button>
+      <button class="kp-btn-close" onclick="closeKP()">✕ Закрыть</button>
+    </div>
+  </div>
+  <div class="kp-page" id="kpPageContent"></div>
+</div>
+
+<!-- 1. Данные -->
+<script src="data/fillings.js?v=20260721"></script>
+<script src="data/profiles.js?v=20260721"></script>
+<script src="data/lamarty.js?v=20260721"></script>
+<script src="data/profile-sections.js?v=20260721"></script>
+
+<!-- 2. Утилиты и store -->
+<script src="js/utils.js?v=20260721"></script>
+<script src="js/store.js?v=20260721"></script>
+
+<!-- 3. Router -->
+<script src="js/router.js?v=20260721"></script>
+
+<!-- 4. Shared layers -->
+<script src="js/shared-kp.js?v=20260721"></script>
+
+<!-- 5. Модуль купе -->
+<script src="js/kupe.js?v=20260721"></script>
+</body>
+</html>
