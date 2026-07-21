@@ -378,7 +378,7 @@ const ORDER_SITE_URL = 'https://keppochka-nwr.github.io/kupe-calc/';
 // Прямые ссылки на чаты. Max НЕ поддерживает ссылки по номеру телефона —
 // нужна персональная ссылка профиля (Max: аватар → QR-код → Поделиться → Скопировать ссылку).
 // Пустая строка = кнопка мессенджера скрыта.
-const ORDER_MAX_URL = '';                       // вида https://max.ru/u/XXXXXXXX (ждём ссылку из приложения Max)
+const ORDER_MAX_URL = 'https://max.ru/u/f9LHodD0cOKgO6v0DjX0Vn7z30jisNqQU0PMLLr7KIOsieTNhK9Kmkwadm4';
 const ORDER_TG_URL  = 'https://t.me/Keppochka';
 
 function buildOrderText() {
