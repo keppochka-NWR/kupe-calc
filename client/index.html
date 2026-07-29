@@ -107,7 +107,7 @@
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="8" height="18" rx="1.5"/><rect x="13" y="3" width="8" height="18" rx="1.5" opacity=".35" stroke-dasharray="3 2"/></svg>
                 Одиночная перегородка
               </div>
-              <div class="tog-desc">Оплачивается 1 дверь</div>
+              <div class="tog-desc">Одна дверь, вторая половина проёма остаётся открытой</div>
             </div>
             <label class="toggle"><input type="checkbox" id="singlePartition"><span class="t-slider"></span></label>
           </div>
@@ -122,6 +122,7 @@
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="3" x2="12" y2="21"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
             </button>
           </div>
+          <div class="profile-help" id="profileHelp"></div>
           <select class="kupe-sel" id="profileColor" onchange="onProfileColorChange()" style="margin-top:8px" title="Цвет профиля"></select>
           <input type="hidden" id="profMarkup" value="0">
         </div>
@@ -152,14 +153,14 @@
           <div class="tog-row">
             <div>
               <div class="tog-lbl">Доводчик</div>
-              <div class="tog-desc">+7 000 ₽ за дверь</div>
+              <div class="tog-desc" id="softCloseDesc">Двери закрываются плавно, без хлопка</div>
             </div>
             <label class="toggle"><input type="checkbox" id="softClose"><span class="t-slider"></span></label>
           </div>
           <div class="tog-row" id="complexRow" style="display:none;margin-top:6px">
             <div>
-              <div class="tog-lbl">Сложная сборка <span class="badge badge-w" style="margin-left:5px">Авто</span></div>
-              <div class="tog-desc" id="complexDesc">+6 000 ₽ за дверь (более 4 вставок)</div>
+              <div class="tog-lbl">Двери со вставками <span class="badge badge-w" style="margin-left:5px">Авто</span></div>
+              <div class="tog-desc" id="complexDesc">Доплата за сборку двери с несколькими вставками</div>
             </div>
             <label class="toggle"><input type="checkbox" id="complexWork" disabled checked><span class="t-slider"></span></label>
           </div>
@@ -265,6 +266,27 @@
 
   </div>
 
+  <!-- CLIENT: примеры на системах Aristo (фото производителя, не выдаём за свои работы) -->
+  <section class="client-gallery-wrap">
+    <h2>Как это выглядит</h2>
+    <p class="client-gallery-lead">Мы работаем на системах Aristo — тех же, что считает калькулятор. Ниже примеры от производителя: под ваш проём и материалы соберём так же.</p>
+    <div class="client-gallery">
+      <figure class="client-gal-item">
+        <img src="assets/gallery/standart.webp" alt="Трёхдверный шкаф-купе с горизонтальными вставками" loading="lazy" width="1400" height="442">
+        <figcaption><b>Стандарт · 3 двери</b>ЛДСП с горизонтальными вставками — классика для детской и спальни</figcaption>
+      </figure>
+      <figure class="client-gal-item">
+        <img src="assets/gallery/grace.webp" alt="Подвесная система GRACE — стеклянная перегородка" loading="lazy" width="1400" height="442">
+        <figcaption><b>GRACE · подвесная</b>Стекло в тонкой рамке, без рельса на полу — зонирование комнаты</figcaption>
+      </figure>
+      <figure class="client-gal-item">
+        <img src="assets/gallery/modul.webp" alt="Стеклянные раздвижные перегородки в интерьере" loading="lazy" width="1400" height="442">
+        <figcaption><b>Стекло в перегородке</b>Тонкий профиль и прозрачное стекло — свет проходит, а зоны разделены</figcaption>
+      </figure>
+    </div>
+    <p class="client-gallery-note">Фото систем предоставлены производителем Aristo. Ваш заказ изготавливается по вашим размерам и выбранным материалам.</p>
+  </section>
+
   <!-- CLIENT: как мы работаем -->
   <section class="client-steps-wrap">
     <h2>Как мы работаем</h2>
@@ -275,6 +297,37 @@
       <div class="client-step"><b>4 · Договор</b><span>Фиксируем цену и сроки на бумаге</span></div>
       <div class="client-step"><b>5 · Производство</b><span>Изготовление до 25 рабочих дней</span></div>
       <div class="client-step"><b>6 · Установка</b><span>Привезём и установим под ключ</span></div>
+    </div>
+  </section>
+
+  <!-- CLIENT: частые вопросы -->
+  <section class="client-faq-wrap">
+    <h2>Частые вопросы</h2>
+    <div class="client-faq">
+      <details class="faq-item">
+        <summary>Нужно ли снимать старые двери?</summary>
+        <p>Нет, это наша работа. При установке демонтируем старые двери и направляющие и увезём их, если попросите. Сам шкаф трогать не придётся — двери-купе меняются отдельно от корпуса.</p>
+      </details>
+      <details class="faq-item">
+        <summary>А если проём неровный?</summary>
+        <p>Так бывает почти всегда — стены и пол редко идеальны. Именно поэтому мы делаем бесплатный замер: замерщик снимает проём в нескольких точках и учитывает завал. Двери изготавливаются по факту, а не по вашим прикидкам, поэтому финальные размеры могут немного отличаться от расчёта на сайте.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Можно заказать без установки?</summary>
+        <p>Да. Установка — по желанию, галочка в заявке. Если ставите сами, привезём двери с направляющими и крепежом, останется закрепить рельсы и завести полотна. Замер всё равно рекомендуем сделать нам — ошибка в размерах обойдётся дороже монтажа.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Сколько ждать и как оплачивать?</summary>
+        <p>До 25 рабочих дней с момента подписания договора. Оплата в два этапа: предоплата при заключении договора после замера и остаток после установки. Цена фиксируется в договоре и потом не меняется.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Какая гарантия?</summary>
+        <p>Гарантия на изделие и работу фиксируется в договоре. Профили Aristo рассчитаны на десятки тысяч открываний; если что-то пойдёт не так — приедем и разберёмся.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Цена на сайте окончательная?</summary>
+        <p>Это точный расчёт по вашим размерам и выбранным материалам — мы не занижаем цифру, чтобы заманить на замер. Итог может измениться только если после замера поменяются размеры или вы сами выберете другое наполнение. Доставка и установка считаются отдельно.</p>
+      </details>
     </div>
   </section>
 
@@ -292,7 +345,10 @@
       <span class="kupe-mbar-lbl">Итого</span>
       <span class="kupe-mbar-price" id="kupeMobileTotal">— ₽</span>
     </button>
-    <button type="button" class="kupe-mbar-calc" onclick="kupeMobileCalc()">Рассчитать</button>
+    <a class="kupe-mbar-call" href="tel:+79101404291" aria-label="Позвонить">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+    </a>
+    <button type="button" class="kupe-mbar-calc" id="kupeMobileCta" onclick="kupeMobileCalc()">Рассчитать</button>
   </div>
 </div>
 

@@ -1022,6 +1022,83 @@ button{cursor:pointer;background:none;border:none}
   display:flex;align-items:center;justify-content:center;
 }
 
+/* Подсказка по профилю */
+.profile-help{
+  font-size:.72rem;line-height:1.45;color:#5a5448;
+  background:#f7f4ed;border:1px solid #ece5d4;border-radius:.4rem;
+  padding:7px 10px;margin-top:8px;
+}
+
+/* Кнопка «Поделиться расчётом» */
+.client-share-btn{
+  width:100%;height:38px;margin-top:-2px;
+  background:transparent;color:#01696f;
+  border:1px solid #cfdedd;border-radius:.45rem;
+  font-size:.78rem;font-weight:700;cursor:pointer;transition:all .15s;
+}
+.client-share-btn:hover{background:#eef5f4;border-color:#01696f}
+
+/* Галерея примеров */
+.client-gallery-wrap{
+  background:#f7f4ed;border-top:1px solid #ddd5c4;
+  padding:34px 24px 30px;
+}
+.client-gallery-wrap h2{
+  text-align:center;font-size:1.25rem;font-weight:800;color:#28251d;margin:0 0 8px;
+}
+.client-gallery-lead{
+  text-align:center;font-size:.85rem;color:#5a5448;line-height:1.5;
+  max-width:64ch;margin:0 auto 18px;
+}
+.client-gallery{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:14px;max-width:1180px;margin:0 auto;
+}
+.client-gal-item{
+  margin:0;background:#fff;border:1px solid #e3dccb;border-radius:.6rem;
+  overflow:hidden;display:flex;flex-direction:column;
+}
+.client-gal-item img{
+  width:100%;height:170px;object-fit:cover;display:block;background:#ece7dc;
+}
+.client-gal-item figcaption{
+  padding:11px 13px 13px;font-size:.76rem;color:#5a5448;line-height:1.45;
+  display:flex;flex-direction:column;gap:3px;
+}
+.client-gal-item figcaption b{font-size:.84rem;color:#28251d;font-weight:800}
+.client-gallery-note{
+  text-align:center;font-size:.68rem;color:#9c958a;margin:16px auto 0;max-width:70ch;line-height:1.5;
+}
+
+/* Частые вопросы */
+.client-faq-wrap{
+  background:#f7f4ed;border-top:1px solid #ddd5c4;padding:32px 24px 34px;
+}
+.client-faq-wrap h2{
+  text-align:center;font-size:1.25rem;font-weight:800;color:#28251d;margin:0 0 18px;
+}
+.client-faq{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:8px}
+.faq-item{
+  background:#fff;border:1px solid #e3dccb;border-radius:.5rem;overflow:hidden;
+}
+.faq-item summary{
+  cursor:pointer;list-style:none;padding:13px 40px 13px 15px;
+  font-size:.86rem;font-weight:700;color:#28251d;position:relative;user-select:none;
+}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{
+  content:'+';position:absolute;right:15px;top:50%;transform:translateY(-50%);
+  font-size:1.15rem;font-weight:400;color:#01696f;line-height:1;
+}
+.faq-item[open] summary::after{content:'−'}
+.faq-item summary:hover{background:#faf8f3}
+.faq-item p{
+  padding:0 15px 14px;font-size:.8rem;line-height:1.6;color:#5a5448;margin:0;
+}
+
+/* Кнопка звонка в мобильной панели */
+.kupe-mbar-call{display:none}
+
 /* Как мы работаем + футер */
 .client-steps-wrap{
   background:#f4f1eb;border-top:1px solid #ddd5c4;
@@ -1059,4 +1136,15 @@ button{cursor:pointer;background:none;border:none}
   .order-row-2{grid-template-columns:1fr}
   .client-hdr-phone{font-size:.8rem;padding:5px 8px}
   .order-field .kupe-inp{height:44px;font-size:16px}
+  .client-gallery-wrap,.client-faq-wrap{padding:26px 14px}
+  .client-gal-item img{height:150px}
+  .faq-item summary{padding:14px 40px 14px 14px}
+  .client-share-btn{height:44px}
+  /* Кнопка звонка рядом с CTA */
+  .kupe-mbar-call{
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    width:44px;height:44px;border-radius:.45rem;
+    background:rgba(247,244,237,.14);color:#f7f4ed;text-decoration:none;
+  }
+  .kupe-mbar-call:active{opacity:.7}
 }

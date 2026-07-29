@@ -109,6 +109,34 @@ function recalculate() {
 }
 
 /* ============================================================
+   CLIENT: подсказка «что за профиль» — человеческим языком.
+   ВАЖНО: объявлены ДО init() — populateProfiles() дёргает updateProfileHelp()
+   на старте, а const в TDZ уронил бы весь init (как было с тёмной темой).
+   ============================================================ */
+const CLIENT_FAMILY_HINTS = {
+  'Стандарт':  'Самая ходовая система: рамка 30 мм, надёжно, много цветов.',
+  'Эконом':    'Та же форма, что у «Стандарта», но проще алюминий — дешевле.',
+  'SLIM LINE': 'Тонкая рамка от 9,5 мм: минимум металла, максимум зеркала и стекла.',
+  'NOVA':      'Профиль 25 мм под ЛДСП 16 мм — прочнее обычного, современный вид.',
+  'GRACE':     'Подвесная: нижнего рельса на полу нет. Для перегородок и проёмов.',
+};
+// Короткие пояснения к конкретным профилям (по названию из выпадающего списка)
+const CLIENT_SYSTEM_HINTS = {
+  'C (классика)':        'классическая C-образная ручка, самый частый выбор',
+  'I (узкий)':           'узкая ручка, фасад выглядит легче',
+  'FLAT (декор / ПВХ)':  'плоская рамка 40 мм с покрытием под дерево',
+  'FUSION':              'универсальная: раздвижная или складная',
+  'SMART':               'усиленная, под тяжёлое наполнение',
+  'AVERS':               'узкая рамка 20 мм, разные материалы с двух сторон',
+  'TWELVE':              'минималистичный профиль 12 мм',
+  'SLIM Line':           'видимая часть 9,5 мм, дверь до 60 кг',
+  'SLIM MAX':            'усиленная, для дверей до 3200 мм высотой',
+  'SLIM Fine':           'тонкий видимый шов',
+  'SLIM Декор':          'с декоративными вставками',
+  'GRACE':               'без нижнего рельса, дверь до 60 кг',
+};
+
+/* ============================================================
    INIT
    ============================================================ */
 (function init() {
@@ -133,6 +161,19 @@ function recalculate() {
   $('softClose').addEventListener('change', updateDisplay);
   $('singlePartition').addEventListener('change', updateDisplay);
   $('filmToggle').addEventListener('change', updateDisplay);
+
+  // CLIENT: цена доводчика берётся из прайса (раньше была захардкожена в разметке и устаревала)
+  const scDesc = $('softCloseDesc');
+  if (scDesc && typeof SOFT_CLOSE_PRICE !== 'undefined') {
+    scDesc.textContent = 'Двери закрываются плавно, без хлопка · +' + fmt(SOFT_CLOSE_PRICE) + ' ₽ за дверь';
+  }
+  updateProfileHelp();
+
+  // CLIENT: расчёт показывается сразу при открытии — обещание «цена за 2 минуты»
+  // выполняется без единого клика. Если пришли по ссылке-расчёту — восстанавливаем её.
+  if (!restoreSharedCalc()) {
+    try { calculate({ silent: true }); } catch (e) { console.error('auto-calc failed:', e); }
+  }
 })();
 
 /* ============================================================
@@ -548,6 +589,111 @@ function orderCopy() {
     navigator.clipboard.writeText(text).then(done).catch(() => _orderFallbackCopy(text, done));
   } else {
     _orderFallbackCopy(text, done);
+  }
+}
+
+/* ============================================================
+   CLIENT: «Поделиться расчётом» — ссылка с параметрами
+   Двери почти всегда обсуждают вдвоём: клиент отправляет ссылку,
+   а менеджер по ней открывает ровно то, что видел клиент.
+   ============================================================ */
+function _sectOptIndex(opt) {
+  if (!opt) return 0;
+  const i = SECTION_OPTS.findIndex(o =>
+    JSON.stringify(o.rowRatios) === JSON.stringify(opt.rowRatios) &&
+    JSON.stringify(o.colRatios) === JSON.stringify(opt.colRatios));
+  return i >= 0 ? i : 0;
+}
+
+function buildShareLink() {
+  const d = window._lastCalcData;
+  const st = {
+    v: 1,
+    W: num('width', 1200), H: num('height', 2000), N: num('doorCount', 2),
+    s: parseInt($('profileSystem').value) || 0,
+    c: parseInt($('profileColor').value) || 0,
+    sc: $('softClose').checked ? 1 : 0,
+    sp: $('singlePartition').checked ? 1 : 0,
+    fl: ($('filmToggle') || {}).checked ? 1 : 0,
+    so: _sectOptIndex(d ? d.sectOpt : sectOpt),
+    df: (typeof doorFills !== 'undefined' && doorFills)
+        ? doorFills.map(row => row.map(f => Math.max(0, FILLINGS.indexOf(f)))) : [],
+    dso: (typeof doorSectOpt !== 'undefined' && doorSectOpt)
+        ? doorSectOpt.map(o => o ? _sectOptIndex(o) : null) : [],
+    rm:  (typeof rowMm !== 'undefined' && rowMm) ? rowMm : [],
+    drm: (typeof doorRowMm !== 'undefined' && doorRowMm) ? doorRowMm : [],
+    tr:  (typeof doorTexRot !== 'undefined' && doorTexRot) ? doorTexRot.map(x => x ? 1 : 0) : [],
+  };
+  // В состоянии только числа (без кириллицы) → btoa безопасен. URL-safe base64.
+  const code = btoa(JSON.stringify(st))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  return location.origin + location.pathname + '?c=' + code;
+}
+
+function restoreSharedCalc() {
+  let code = '';
+  try { code = new URLSearchParams(location.search).get('c') || ''; } catch (e) { return false; }
+  if (!code) return false;
+  try {
+    const st = JSON.parse(atob(code.replace(/-/g, '+').replace(/_/g, '/')));
+    if (!st || st.v !== 1) return false;
+    // 1. Размеры и количество
+    $('width').value  = st.W;
+    $('height').value = st.H;
+    $('doorCount').value = st.N;
+    if (typeof updateChipsActive === 'function') updateChipsActive(st.N);
+    // 2. Профиль: семейство → система → цвет
+    const sys = PROFILE_SYSTEMS[st.s];
+    if (sys && sys.family) {
+      $('profileFamily').value = sys.family;
+      populateProfileSystemsForFamily(sys.family);
+    }
+    $('profileSystem').value = st.s;
+    populateProfileColors(st.s);
+    $('profileColor').value = st.c;
+    // 3. Опции
+    $('softClose').checked       = !!st.sc;
+    $('singlePartition').checked = !!st.sp;
+    if ($('filmToggle')) $('filmToggle').checked = !!st.fl;
+    // 4. Сетка секций и разделители (до пересборки наполнений)
+    setSections(st.so || 0);
+    onDoorCountChange();
+    if (Array.isArray(st.rm))  rowMm     = st.rm.slice();
+    if (Array.isArray(st.drm)) doorRowMm = st.drm.slice();
+    doorTexRot  = Array.isArray(st.tr)  ? st.tr.map(x => !!x) : [];
+    doorSectOpt = Array.isArray(st.dso)
+      ? st.dso.map(i => (i == null) ? null : Object.assign({}, SECTION_OPTS[i])) : [];
+    // 5. Наполнения — последними, иначе их затрёт пересборка выше
+    if (Array.isArray(st.df) && st.df.length) {
+      doorFills = st.df.map(row => row.map(i => FILLINGS[i] || FILLINGS[0]));
+    }
+    updateProfileHelp();
+    calculate({ silent: true });
+    return true;
+  } catch (e) {
+    console.error('restoreSharedCalc failed:', e);
+    return false;
+  }
+}
+
+function shareCalc() {
+  const url = buildShareLink();
+  const btn = $('shareCalcBtn');
+  const flash = txt => {
+    if (!btn) return;
+    btn.textContent = txt;
+    setTimeout(() => { btn.textContent = 'Поделиться расчётом'; }, 2600);
+  };
+  if (navigator.share) {
+    navigator.share({ title: 'Мой расчёт дверей-купе — Ё Мебель', url: url }).catch(() => {});
+    return;
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url)
+      .then(() => flash('Ссылка скопирована ✓'))
+      .catch(() => _orderFallbackCopy(url, () => flash('Ссылка скопирована ✓')));
+  } else {
+    _orderFallbackCopy(url, () => flash('Ссылка скопирована ✓'));
   }
 }
 
@@ -1092,6 +1238,11 @@ function switchActiveDoor(doorIdx) {
 function updateDoorSectOptCard() {
   const card = $('doorSectOptCard');
   if (!card) return;
+  // CLIENT: индивидуальная сетка на каждую дверь — менеджерский инструмент, скрыт.
+  // Клиенту хватает готовых пресетов; тонкую настройку сделает менеджер при замере.
+  card.style.display = 'none';
+  return;
+  /* eslint-disable no-unreachable */
   const N = num('doorCount', 2);
   if (N <= 1) { card.style.display = 'none'; return; }
   card.style.display = 'block';
@@ -1197,8 +1348,9 @@ function updateComplexRow() {
   if (maxCnt >= COMPLEX_SECTIONS_THRESHOLD) {
     cr.style.display = 'flex';
     $('complexWork').checked = true;
+    // CLIENT: без внутренних порогов и формул — просто что это и сколько стоит
     $('complexDesc').textContent =
-      '+' + fmt(COMPLEX_WORK_PRICE) + ' ₽ за дверь (макс. ' + maxCnt + ' вставок, ≥ ' + COMPLEX_SECTIONS_THRESHOLD + ')';
+      'Доплата за сборку двери со вставками — ' + fmt(COMPLEX_WORK_PRICE) + ' ₽ за дверь';
   } else {
     cr.style.display = 'none';
   }
@@ -1237,7 +1389,8 @@ function rerenderVisualization() {
 // Реальный индекс sysIdx (в PROFILE_SYSTEMS) хранится в #profileSystem.value — это сохраняет совместимость с drafts.
 
 function populateProfiles() {
-  const FAMILIES = ['Стандарт', 'Эконом', 'SLIM LINE', 'NOVA', 'GRACE', 'Свои'];
+  // CLIENT: семейство «Свои» (ручной ввод цен) — менеджерский режим, клиенту не показываем
+  const FAMILIES = ['Стандарт', 'Эконом', 'SLIM LINE', 'NOVA', 'GRACE'];
   // 1. Семейства
   const selF = $('profileFamily');
   selF.innerHTML = '';
@@ -1258,13 +1411,29 @@ function populateProfileSystemsForFamily(family) {
     if (s.family !== family) return;
     const op = document.createElement('option');
     op.value = i;
-    op.textContent = s.profile || s.system;
+    // CLIENT: «✨» ничего не говорит клиенту — пишем словом
+    op.textContent = (s.profile || s.system).replace(/\s*✨\s*/, ' — новинка');
     sel.appendChild(op);
   });
   // Подцветить первый профиль семейства
   if (sel.options.length > 0) {
     populateProfileColors(parseInt(sel.options[0].value));
   }
+  updateProfileHelp();
+}
+
+function updateProfileHelp() {
+  const box = $('profileHelp');
+  if (!box) return;
+  const fam = ($('profileFamily') || {}).value || '';
+  const sysSel = $('profileSystem');
+  const sysName = (sysSel && sysSel.selectedOptions[0])
+    ? sysSel.selectedOptions[0].textContent.replace(/\s*—\s*новинка\s*$/, '').trim()
+    : '';
+  const famText = CLIENT_FAMILY_HINTS[fam] || '';
+  const sysText = CLIENT_SYSTEM_HINTS[sysName] || '';
+  box.textContent = sysText ? famText + ' ' + sysName + ' — ' + sysText + '.' : famText;
+  box.style.display = box.textContent ? '' : 'none';
 }
 
 function populateProfileColors(sysIdx) {
@@ -1287,6 +1456,7 @@ function onProfileFamilyChange() {
 function onProfileSystemChange() {
   const sysIdx = num('profileSystem', 0);
   populateProfileColors(sysIdx);
+  updateProfileHelp();
   updateDisplay(); // смена системы профиля → новые цены
 }
 
@@ -1842,8 +2012,9 @@ function renderResults(d) {
       '</div>' +
     '</div>' +
 
-    // CLIENT: CTA — оформить заявку (форма + мессенджеры)
+    // CLIENT: CTA — оформить заявку (форма + мессенджеры) и ссылка на расчёт
     '<button type="button" class="kupe-btn-order" onclick="openOrderModal()">Оформить заявку — бесплатный замер</button>' +
+    '<button type="button" class="client-share-btn" id="shareCalcBtn" onclick="shareCalc()">Поделиться расчётом</button>' +
 
     // CLIENT: что входит в цену (без внутренней разбивки по компонентам)
     '<div>' +
@@ -1867,6 +2038,12 @@ function renderResults(d) {
   // v1.4: обновить «Итого» в мобильной нижней панели
   const mbarTotal = document.getElementById('kupeMobileTotal');
   if (mbarTotal) mbarTotal.textContent = fmt(d.total) + ' ₽';
+  // CLIENT: цена уже посчитана → кнопка внизу становится призывом к действию
+  const mbarCta = document.getElementById('kupeMobileCta');
+  if (mbarCta) {
+    mbarCta.textContent = 'Заявка';
+    mbarCta.onclick = openOrderModal;
+  }
   // v1.3: после расчёта — снять disabled с «Экспорт КП» (критика #1)
   const exportBtn = document.getElementById('kupeExportKPBtn');
   if (exportBtn) { exportBtn.removeAttribute('disabled'); exportBtn.removeAttribute('title'); }
