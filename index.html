@@ -6,7 +6,7 @@
 <title>Калькулятор дверей-купе</title>
 <!-- Шрифт Satoshi (Fontshare CDN) отключён — приложение работает оффлайн с USB.
      Fallback: Helvetica Neue → Arial → системный sans-serif. См. --font в css/main.css. -->
-<link rel="stylesheet" href="css/main.css?v=20260721c">
+<link rel="stylesheet" href="css/main.css?v=20260928a">
 </head>
 <body>
 
@@ -50,7 +50,7 @@
       <span class="kupe-bc-muted">Калькулятор</span>
       <span class="kupe-bc-sep">/</span>
       <span class="kupe-bc-current">Двери-купе</span>
-      <span class="kupe-bc-version" id="kupeVersion">v 2.9 — 2026.07.21</span>
+      <span class="kupe-bc-version" id="kupeVersion">v 2.10 — 2026.09.28</span>
     </div>
     <div class="kupe-topbar-actions">
       <button class="kupe-btn-out" onclick="kupeOpenDraftsList()" title="Открыть сохранённый">Открыть</button>
@@ -71,7 +71,7 @@
         <div class="kupe-sec">
           <div class="kupe-sec-lbl">Размеры проёма, мм</div>
           <div class="kupe-row-2">
-            <input class="kupe-inp" id="width" type="number" value="1200" min="400" max="4000" placeholder="Ширина">
+            <input class="kupe-inp" id="width" type="number" value="1200" min="400" max="6000" placeholder="Ширина">
             <input class="kupe-inp" id="height" type="number" value="2000" min="600" max="3000" placeholder="Высота">
           </div>
         </div>
@@ -162,7 +162,7 @@
           <div class="tog-row">
             <div>
               <div class="tog-lbl">Доводчик</div>
-              <div class="tog-desc">+7 000 ₽ за дверь</div>
+              <div class="tog-desc" id="softClosePrice">+5 600 ₽ за дверь</div>
             </div>
             <label class="toggle"><input type="checkbox" id="softClose"><span class="t-slider"></span></label>
           </div>
@@ -350,22 +350,22 @@
 </div>
 
 <!-- 1. Данные -->
-<script src="data/fillings.js?v=20260721c"></script>
-<script src="data/profiles.js?v=20260721c"></script>
-<script src="data/lamarty.js?v=20260721c"></script>
-<script src="data/profile-sections.js?v=20260721c"></script>
+<script src="data/fillings.js?v=20260928a"></script>
+<script src="data/profiles.js?v=20260928a"></script>
+<script src="data/lamarty.js?v=20260928a"></script>
+<script src="data/profile-sections.js?v=20260928a"></script>
 
 <!-- 2. Утилиты и store -->
-<script src="js/utils.js?v=20260721c"></script>
-<script src="js/store.js?v=20260721c"></script>
+<script src="js/utils.js?v=20260928a"></script>
+<script src="js/store.js?v=20260928a"></script>
 
 <!-- 3. Router -->
-<script src="js/router.js?v=20260721c"></script>
+<script src="js/router.js?v=20260928a"></script>
 
 <!-- 4. Shared layers -->
-<script src="js/shared-kp.js?v=20260721c"></script>
+<script src="js/shared-kp.js?v=20260928a"></script>
 
 <!-- 5. Модуль купе -->
-<script src="js/kupe.js?v=20260721c"></script>
+<script src="js/kupe.js?v=20260928a"></script>
 </body>
 </html>

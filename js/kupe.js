@@ -130,6 +130,7 @@ function recalculate() {
     buildDividersBlock();
     debouncedUpdate();
   });
+  $('softClosePrice').textContent = '+' + fmt(SOFT_CLOSE_PRICE) + ' ₽ за дверь';
   $('softClose').addEventListener('change', updateDisplay);
   $('singlePartition').addEventListener('change', updateDisplay);
   $('filmToggle').addEventListener('change', updateDisplay);
@@ -1345,8 +1346,8 @@ function calculate(opts) {
     if (!silent) alert('Укажите размеры проёма и количество дверей');
     return;
   }
-  if (W < 400 || W > 4000) {
-    if (!silent) alert('Ширина проёма должна быть от 400 до 4000 мм. Сейчас: ' + W + ' мм');
+  if (W < 400 || W > 6000) {
+    if (!silent) alert('Ширина проёма должна быть от 400 до 6000 мм. Сейчас: ' + W + ' мм');
     return;
   }
   if (H < 600 || H > 3000) {
@@ -2758,7 +2759,7 @@ function initKupeVersion() {
   const fv = (typeof FILLINGS_VERSION !== 'undefined') ? FILLINGS_VERSION : '—';
   const pv = (typeof PROFILES_VERSION !== 'undefined') ? PROFILES_VERSION : '—';
   // Show most recent of versions
-  el.textContent = 'v 2.9 — прайс ' + (fv > pv ? fv : pv);
+  el.textContent = 'v 2.10 — прайс ' + (fv > pv ? fv : pv);
 }
 
 /**
