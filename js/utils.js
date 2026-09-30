@@ -5,7 +5,19 @@
 
 const $ = id => document.getElementById(id);
 
-const num = (id, fallback = 0) => +$(id).value || fallback;
+// Only numbers and sums are accepted; never execute dimension input as code.
+function parseDimensionSum(raw) {
+  const text = String(raw).trim();
+  if (!/^\d+(?:[.,]\d+)?(?:\s*\+\s*\d+(?:[.,]\d+)?)*$/.test(text)) return NaN;
+  const value = text.split('+').reduce((sum, term) => sum + Number(term.trim().replace(',', '.')), 0);
+  return Number.isFinite(value) ? Number(value.toFixed(6)) : NaN;
+}
+
+const num = (id, fallback = 0) => {
+  const input = $(id);
+  const value = input.hasAttribute('data-dimension-sum') ? parseDimensionSum(input.value) : +input.value;
+  return value || fallback;
+};
 
 const fmt = n => {
   // Защита от NaN/Infinity — в КП и UI не должны попадать «NaN ₽» или «∞ ₽».

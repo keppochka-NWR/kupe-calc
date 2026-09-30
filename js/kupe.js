@@ -73,12 +73,54 @@ let activeDoorEdit = 0;           // какая дверь активна (чь�
 
 // HELPERS ($, num, fmt, pluralDoors, debounce) вынесены в js/utils.js
 
+const OPENING_DIMENSIONS = {
+  width: { label: 'Ширина проёма', min: 400, max: 6000 },
+  height: { label: 'Высота проёма', min: 600, max: 3000 },
+};
+
+function readOpeningDimension(id) {
+  const spec = OPENING_DIMENSIONS[id];
+  const value = parseDimensionSum($(id).value);
+  let error = '';
+  if (!Number.isFinite(value)) error = spec.label + ': введите число или сумму, например 808+880.';
+  else if (value < spec.min || value > spec.max) {
+    error = spec.label + ': допустимо от ' + spec.min + ' до ' + spec.max + ' мм. Получилось: ' + value + ' мм.';
+  }
+  return { value, error };
+}
+
+function setDimensionError(id, message) {
+  $(id).setCustomValidity(message);
+  $(id).setAttribute('aria-invalid', String(!!message));
+  $(id + 'Error').textContent = message;
+}
+
+function validateOpeningDimensions(normalize = false, showErrors = false) {
+  let valid = true;
+  for (const id of Object.keys(OPENING_DIMENSIONS)) {
+    const result = readOpeningDimension(id);
+    if (showErrors) setDimensionError(id, result.error);
+    if (result.error) valid = false;
+    else if (normalize) $(id).value = String(result.value);
+  }
+  return valid;
+}
+
+function commitOpeningDimension(id) {
+  const result = readOpeningDimension(id);
+  setDimensionError(id, result.error);
+  if (result.error) return;
+  $(id).value = String(result.value);
+  updateDisplay();
+}
+
 /* ============================================================
    LIVE UPDATE — автопересчёт при изменении параметров
    ============================================================ */
 
 // updateDisplay: если результаты уже показаны → пересчёт, иначе → только визуализация
 function updateDisplay() {
+  if (!validateOpeningDimensions()) return;
   if (window._lastCalcData) recalculate();
   else rerenderVisualization();
 }
@@ -124,12 +166,24 @@ function recalculate() {
   if (typeof populateBulkSelectors === 'function') populateBulkSelectors();
   // Живой пересчёт — подписываемся на все изменения параметров
   const debouncedUpdate = debounce(updateDisplay, 350);
-  $('width').addEventListener('input', debouncedUpdate);
-  $('height').addEventListener('input', () => {
-    rowMm = []; // сбросить mm при смене высоты чтобы пересчитались
-    buildDividersBlock();
-    debouncedUpdate();
-  });
+  for (const id of Object.keys(OPENING_DIMENSIONS)) {
+    const input = $(id);
+    input.addEventListener('input', () => {
+      setDimensionError(id, '');
+      if (id === 'height' && !readOpeningDimension(id).error) {
+        rowMm = [];
+        buildDividersBlock();
+      }
+      debouncedUpdate();
+    });
+    input.addEventListener('blur', () => commitOpeningDimension(id));
+    input.addEventListener('keydown', event => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        commitOpeningDimension(id);
+      }
+    });
+  }
   $('softClosePrice').textContent = '+' + fmt(SOFT_CLOSE_PRICE) + ' ₽ за дверь';
   $('softClose').addEventListener('change', updateDisplay);
   $('singlePartition').addEventListener('change', updateDisplay);
@@ -1337,6 +1391,7 @@ function getAdjustedPrices() {
    ============================================================ */
 function calculate(opts) {
   const silent = !!(opts && opts.silent); // true = пропустить строгие алерты (для live-пересчёта)
+  if (!validateOpeningDimensions(!silent, !silent)) return;
   const W = num('width');
   const H = num('height');
   const N = num('doorCount', 2);
@@ -1344,14 +1399,6 @@ function calculate(opts) {
   // Просто молча выйти из расчёта; полная валидация только при явном «Рассчитать стоимость».
   if (!W || !H || !N) {
     if (!silent) alert('Укажите размеры проёма и количество дверей');
-    return;
-  }
-  if (W < 400 || W > 6000) {
-    if (!silent) alert('Ширина проёма должна быть от 400 до 6000 мм. Сейчас: ' + W + ' мм');
-    return;
-  }
-  if (H < 600 || H > 3000) {
-    if (!silent) alert('Высота проёма должна быть от 600 до 3000 мм. Сейчас: ' + H + ' мм');
     return;
   }
   if (N < 1 || N > 7) {
@@ -1439,6 +1486,9 @@ function calculate(opts) {
       violations.push('Ширина одной двери: ' + doorL + ' мм (W/N = ' + W + '/' + N + '; допустимо ' + L.doorL_min + '–' + L.doorL_max + ' мм для системы «' + sys.system + '»)');
     }
     if (violations.length > 0) {
+      // Do not interrupt typing or blur with a modal before the door count can
+      // be changed. Explicit Calculate still asks about catalogue exceptions.
+      if (silent) return;
       const proceed = confirm(
         '⚠️ Размеры вне каталоговых пределов Аристо:\n\n• ' + violations.join('\n• ') +
         '\n\nРассчитать всё равно?\n(OK — продолжить, Cancel — изменить параметры)'
@@ -2690,6 +2740,8 @@ ${specsHTML}
 function resetForm() {
   $('width').value = 1200;
   $('height').value = 2000;
+  setDimensionError('width', '');
+  setDimensionError('height', '');
   $('doorCount').value = 2;
   $('softClose').checked = false;
   doorFills = [];
@@ -2759,7 +2811,7 @@ function initKupeVersion() {
   const fv = (typeof FILLINGS_VERSION !== 'undefined') ? FILLINGS_VERSION : '—';
   const pv = (typeof PROFILES_VERSION !== 'undefined') ? PROFILES_VERSION : '—';
   // Show most recent of versions
-  el.textContent = 'v 2.10 — прайс ' + (fv > pv ? fv : pv);
+  el.textContent = 'v 2.11 — прайс ' + (fv > pv ? fv : pv);
 }
 
 /**
@@ -2843,6 +2895,7 @@ function collectKupeState() {
 }
 
 function kupeSaveDraft() {
+  if (!validateOpeningDimensions(true, true)) return;
   if (!_lsAvailable) {
     alert('Сохранение недоступно — браузер не разрешает localStorage (возможно, приватный режим). Откройте обычное окно Chrome.');
     return;

@@ -955,3 +955,8 @@ button{cursor:pointer;background:none;border:none}
   }
   .kupe-mbar-calc:active{opacity:.8}
 }
+
+/* Opening dimension sums: keep errors next to the field. */
+.kupe-inp[aria-invalid=true]{border-color:var(--color-error)}
+.kupe-dimension-error{color:var(--color-error);font-size:.74rem;line-height:1.4}
+.kupe-dimension-error:not(:empty){margin-top:6px}
